@@ -1349,10 +1349,17 @@ mrss_parse_url_with_options_error_and_transfer_buffer (char *url,
       return MRSS_ERR_PARSER;
     }
 
+  if (doc->charset_detected == NXML_CHARSET_UNKNOWN)
+  {
+      free (buffer);
+      nxml_free (doc);
+      return MRSS_ERR_PARSER;
+  }
+
   if (!(err = __mrss_parser (doc, ret)))
     {
       if (!((*ret)->file = strdup (url)))
-	{
+       {
 	  mrss_free (*ret);
 	  nxml_free (doc);
 	  free (buffer);
@@ -1399,6 +1406,13 @@ mrss_parse_file (char *file, mrss_t ** ret)
       return MRSS_ERR_PARSER;
     }
 
+  if (doc->charset_detected == NXML_CHARSET_UNKNOWN)
+  { 
+      nxml_free (doc);
+      return MRSS_ERR_PARSER;
+  }
+ 
+
   if (!(err = __mrss_parser (doc, ret)))
     {
       if (!((*ret)->file = strdup (file)))
@@ -1411,6 +1425,7 @@ mrss_parse_file (char *file, mrss_t ** ret)
 
       (*ret)->size = st.st_size;
     }
+
 
   nxml_free (doc);
 
@@ -1434,6 +1449,14 @@ mrss_parse_buffer (char *buffer, size_t size, mrss_t ** ret)
       nxml_free (doc);
       return MRSS_ERR_PARSER;
     }
+
+  if (doc->charset_detected == NXML_CHARSET_UNKNOWN)
+  {
+      nxml_free (doc);
+      return MRSS_ERR_PARSER;
+  }
+
+
 
   if (!(err = __mrss_parser (doc, ret)))
     (*ret)->size = size;
